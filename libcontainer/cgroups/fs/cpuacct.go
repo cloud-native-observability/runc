@@ -2,6 +2,7 @@ package fs
 
 import (
 	"bufio"
+	"errors"
 	"os"
 	"strconv"
 	"strings"
@@ -9,6 +10,8 @@ import (
 	"github.com/opencontainers/runc/libcontainer/cgroups"
 	"github.com/opencontainers/runc/libcontainer/cgroups/fscommon"
 	"github.com/opencontainers/runc/libcontainer/configs"
+
+	"golang.org/x/sys/unix"
 )
 
 const (
@@ -26,6 +29,10 @@ const (
 	// so we can avoid using cgo here. For details, see:
 	// https://github.com/containerd/cgroups/pull/12
 	clockTicks uint64 = 100
+
+	cgroupCpuacctCpuPressure = "cpu.pressure"
+	cgroupCpuacctMemPressure = "memory.pressure"
+	cgroupCpuacctIOPressure  = "io.pressure"
 )
 
 type CpuacctGroup struct{}
@@ -72,6 +79,16 @@ func (s *CpuacctGroup) GetStats(path string, stats *cgroups.Stats) error {
 	stats.CpuStats.CpuUsage.PercpuUsageInUsermode = percpuUsageInUsermode
 	stats.CpuStats.CpuUsage.UsageInUsermode = userModeUsage
 	stats.CpuStats.CpuUsage.UsageInKernelmode = kernelModeUsage
+
+	if err := statPSI(path, cgroupCpuacctCpuPressure, stats.CpuStats.PSI); err != nil && !errors.Is(err, os.ErrNotExist) && !errors.Is(err, unix.ENOTSUP) {
+		return err
+	}
+	if err := statPSI(path, cgroupCpuacctMemPressure, stats.MemoryStats.PSI); err != nil && !errors.Is(err, os.ErrNotExist) && !errors.Is(err, unix.ENOTSUP) {
+		return err
+	}
+	if err := statPSI(path, cgroupCpuacctIOPressure, stats.BlkioStats.PSI); err != nil && !errors.Is(err, os.ErrNotExist) && !errors.Is(err, unix.ENOTSUP) {
+		return err
+	}
 	return nil
 }
 

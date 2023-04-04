@@ -484,7 +484,7 @@ function requires() {
 		psi)
 			# If PSI is not compiled in the kernel, the file will not exist.
 			# If PSI is compiled, but not enabled, read will fail with ENOTSUPP.
-			if ! cat /sys/fs/cgroup/cpu.pressure &>/dev/null; then
+			if ! cat /sys/fs/cgroup/cpu.pressure &>/dev/null && ! cat /sys/fs/cgroup/cpuset,cpu,cpuacct/cpu.pressure &>/dev/null; then
 				skip_me=1
 			fi
 			;;
