@@ -1,6 +1,7 @@
 package fs
 
 import (
+	"path/filepath"
 	"reflect"
 	"testing"
 
@@ -93,5 +94,17 @@ func TestCpuacctStatsWithoutUsageAll(t *testing.T) {
 	if !reflect.DeepEqual(expectedStats, actualStats.CpuStats.CpuUsage) {
 		t.Errorf("Expected CPU usage %#v but found %#v\n",
 			expectedStats, actualStats.CpuStats.CpuUsage)
+	}
+}
+
+func TestCpuacctStatsOfPSIFromCgroupV1(t *testing.T) {
+	cgroupRoot := "/host/sys/fs/cgroup/cpuacct"
+	path := filepath.Join(cgroupRoot, "kubepods", "burstable")
+
+	cpuacct := &CpuacctGroup{}
+	actualStats := *cgroups.NewStats()
+	err := cpuacct.GetStats(path, &actualStats)
+	if err != nil {
+		t.Fatal(err)
 	}
 }

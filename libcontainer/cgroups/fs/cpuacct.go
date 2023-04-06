@@ -80,13 +80,13 @@ func (s *CpuacctGroup) GetStats(path string, stats *cgroups.Stats) error {
 	stats.CpuStats.CpuUsage.UsageInUsermode = userModeUsage
 	stats.CpuStats.CpuUsage.UsageInKernelmode = kernelModeUsage
 
-	if err := statPSI(path, cgroupCpuacctCpuPressure, stats.CpuStats.PSI); err != nil && !errors.Is(err, os.ErrNotExist) && !errors.Is(err, unix.ENOTSUP) {
+	if err := statPSI(path, cgroupCpuacctCpuPressure, &stats.CpuStats.PSI); err != nil && !errors.Is(err, os.ErrNotExist) && !errors.Is(err, unix.ENOTSUP) {
 		return err
 	}
-	if err := statPSI(path, cgroupCpuacctMemPressure, stats.MemoryStats.PSI); err != nil && !errors.Is(err, os.ErrNotExist) && !errors.Is(err, unix.ENOTSUP) {
+	if err := statPSI(path, cgroupCpuacctMemPressure, &stats.MemoryStats.PSI); err != nil && !errors.Is(err, os.ErrNotExist) && !errors.Is(err, unix.ENOTSUP) {
 		return err
 	}
-	if err := statPSI(path, cgroupCpuacctIOPressure, stats.BlkioStats.PSI); err != nil && !errors.Is(err, os.ErrNotExist) && !errors.Is(err, unix.ENOTSUP) {
+	if err := statPSI(path, cgroupCpuacctIOPressure, &stats.BlkioStats.PSI); err != nil && !errors.Is(err, os.ErrNotExist) && !errors.Is(err, unix.ENOTSUP) {
 		return err
 	}
 	return nil
